@@ -1,0 +1,32 @@
+#Command
+#ls - show all matches files
+#mv - mv file to Curuntine_directory
+#rm - permanent remove
+#Sort - mv to special folder
+Curuntine_directory: "/home/fritnes/Downloads/Curuntine"
+Day_clear: "3"
+
+Directory:
+  Download:
+    paths:
+       - "~/Downloads"
+       - "~/Downloads/Telegram Desktop"
+    files:
+      mv_curuntine:
+        file_patern: "\\.deb|\\.img|\\.iso|\\.img|\\.AppImage|\\.exe|\\.msi|\\.apk"
+        command: "mv"
+      sort_documents:
+        file_patern: "\\.pdf|\\.docx|\\.doc|\\.odt|\\.odg"
+        command: "sort"
+        sort_path: "/home/fritnes/Downloads/Documents"
+      sort_photo:
+        file_patern: "\\.jpg|\\.png"
+        command: "sort"
+        sort_path: "/home/fritnes/Downloads/Photo"
+
+  Home:
+    path: "/home/fritnes"
+    files:
+      test:
+        file_patern: "test"
+        command: "ls"
