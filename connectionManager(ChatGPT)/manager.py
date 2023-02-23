@@ -1,9 +1,10 @@
-#This program created by using chatgpt. 
+#This program created by using chatgpt.
 import sys
 import os
 import sqlite3
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QTableView, QPushButton, QLineEdit, QLabel, QMessageBox, QFileDialog
 from PyQt5.QtSql import QSqlDatabase, QSqlTableModel
+import yaml
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -14,6 +15,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('SSH Manager')
         self.create_widgets()
         self.show()
+        self.open_db_if_exists()
 
     def create_widgets(self):
         # create widgets
@@ -53,6 +55,19 @@ class MainWindow(QMainWindow):
         central_widget.setLayout(vbox)
         self.setCentralWidget(central_widget)
 
+    def open_db_if_exists(self):
+        # check if database and table exist
+        db_name = config["database"]["name"]
+        if os.path.isfile(db_name):
+            self.db = QSqlDatabase.addDatabase('QSQLITE')
+            self.db.setDatabaseName(db_name)
+            if not self.db.open():
+                QMessageBox.warning(self, 'Error', 'Could not open database.')
+                self.db = None
+                return
+            if self.db.tables().count(self.table) > 0:
+                self.load_table()
+
     def open_db(self):
         file_dialog = QFileDialog()
         file_dialog.setFileMode(QFileDialog.AnyFile)
@@ -70,6 +85,7 @@ class MainWindow(QMainWindow):
                 QMessageBox.warning(self, 'Error', 'Could not open database.')
                 self.db = None
                 return
+            self.db_name = db_name  # update default database name
             self.load_table()
 
     def create_db(self):
@@ -85,6 +101,7 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, 'Error', 'Could not create database.')
             self.db = None
             return
+        self.db_name = db_name  # update default database name
         self.create_table()
         self.load_table()
 
@@ -127,6 +144,9 @@ class MainWindow(QMainWindow):
         os.system(command)
 
 if __name__ == '__main__':
+    # Load YUML configuration file
+    with open("config.yml", "r") as f:
+        config = yaml.safe_load(f)
     app = QApplication(sys.argv)
     window = MainWindow()
     sys.exit(app.exec_())
