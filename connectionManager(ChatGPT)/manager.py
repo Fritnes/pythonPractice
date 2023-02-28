@@ -12,7 +12,7 @@ class MainWindow(QMainWindow):
         self.db = None
         self.table = 'mytable'
         self.setGeometry(100, 100, 800, 500)
-        self.setWindowTitle('SSH Manager')
+        self.setWindowTitle('SSH Proxy Manager')
         self.create_widgets()
         self.show()
         self.open_db_if_exists()
@@ -34,6 +34,9 @@ class MainWindow(QMainWindow):
         self.connect_button = QPushButton('Connect')
         self.connect_button.clicked.connect(self.connect_record)
 
+        self.connect_defualt_button = QPushButton('Connect by default_port')
+        self.connect_defualt_button.clicked.connect(self.defualt_button)
+
         self.table_view = QTableView()
 
         # create layout
@@ -45,6 +48,7 @@ class MainWindow(QMainWindow):
         button_hbox.addWidget(self.add_button)
         button_hbox.addWidget(self.remove_button)
         button_hbox.addWidget(self.connect_button)
+        button_hbox.addWidget(self.connect_defualt_button)
 
         vbox = QVBoxLayout()
         vbox.addLayout(top_hbox)
@@ -106,7 +110,7 @@ class MainWindow(QMainWindow):
         self.load_table()
 
     def create_table(self):
-        query = f'CREATE TABLE {self.table} (id INTEGER PRIMARY KEY AUTOINCREMENT, hostname TEXT, username TEXT, port INTEGER)'
+        query = f'CREATE TABLE {self.table} (id INTEGER PRIMARY KEY AUTOINCREMENT, hostname TEXT, username TEXT, port INTEGER, proxy_port INTEGER)'
         self.db.exec(query)
 
     def load_table(self):
@@ -140,7 +144,23 @@ class MainWindow(QMainWindow):
         hostname = record.value('hostname')
         username = record.value('username')
         port = record.value('port')
-        command = f"xterm -e 'bash -c \"ssh {username}@{hostname} -p {port}\"'"
+        proxy_port = record.value('proxy_port')
+        command = f"xterm -e 'bash -c \"ssh -D {proxy_port} {username}@{hostname} -p {port}\"'"
+        os.system(command)
+
+    def defualt_button(self):
+        model = self.table_view.model()
+        selected_indexes = self.table_view.selectedIndexes()
+        if not selected_indexes:
+            return
+        row = selected_indexes[0].row()
+        record = model.record(row)
+        id = record.value('id')
+        hostname = record.value('hostname')
+        username = record.value('username')
+        port = record.value('port')
+        proxy_port = config["proxy_option"]["default_port"]
+        command = f"xterm -e 'bash -c \"ssh -D {proxy_port} {username}@{hostname} -p {port}\"'"
         os.system(command)
 
 if __name__ == '__main__':

@@ -1,2 +1,4 @@
 database:
   name: default.db
+proxy_option:
+  default_port: 8888
